@@ -1,0 +1,17 @@
+# Ignore container volumes and system configs
+config/
+config_backup/
+.openclaw/
+gateway.log
+gateway_debug.log
+memory-search-container.ts
+web-shared-container.ts
+
+# Ignore temporary/development files
+.gemini/
+node_modules/
+dist/
+tmp/
+*.log
+*.pid
+*.lock

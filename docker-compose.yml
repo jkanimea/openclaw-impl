@@ -1,0 +1,48 @@
+services:
+  ubuntu-gui:
+    image: lscr.io/linuxserver/webtop:ubuntu-kde
+    container_name: openclaw_gui_v2
+    privileged: true
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - TITLE=OpenClaw Desktop
+      - START_DOCKER=true # Enables Docker-in-Docker inside the Alpine desktop
+      - OLLAMA_HOST=ollama:11434
+    volumes:
+      - config_vol:/config
+    ports:
+      - 3002:3000
+      - 18789:18789
+    shm_size: "2gb"
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:latest
+    container_name: caddy_openclaw_proxy
+    restart: unless-stopped
+    ports:
+      - "8443:8443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./localhost+3.pem:/etc/caddy/cert.pem:ro
+      - ./localhost+3-key.pem:/etc/caddy/key.pem:ro
+    depends_on:
+      - ubuntu-gui
+
+  ollama:
+    image: docker.io/ollama/ollama:latest
+    container_name: openclaw_ollama
+    restart: unless-stopped
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+    devices:
+      - nvidia.com/gpu=all
+    volumes:
+      - ollama_vol:/root/.ollama
+
+volumes:
+  config_vol:
+  ollama_vol:
