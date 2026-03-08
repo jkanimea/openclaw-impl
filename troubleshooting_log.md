@@ -60,10 +60,20 @@
 
 ### Issue: Gateway Not Running After Podman Restart
 **Scenario**: After restarting the pod from Podman Desktop, HTTPS returns 502.
-**Cause**: The gateway does NOT auto-start after container restart.
-**Resolution** - Run this command after starting the pod:
+**Cause**: 
+1. Gateway does NOT auto-start after container restart
+2. Caddy proxy needs to be restarted to connect to gateway
+
+**Full Resolution** - Run these commands after starting the pod:
 ```bash
+# 1. Install Node.js (only needed once per fresh container)
+podman exec -u root openclaw_gui_v2 sh -c "curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && apt-get install -y nodejs"
+
+# 2. Start the gateway
 podman exec -d openclaw_gui_v2 sh -c "cd /config/openclaw && nohup node dist/index.js gateway run --force > /config/gateway.log 2>&1 &"
+
+# 3. Restart Caddy proxy
+podman restart caddy_openclaw_proxy
 ```
 
 Wait 10 seconds, then test: https://localhost:8443/

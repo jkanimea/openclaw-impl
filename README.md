@@ -18,6 +18,21 @@ Run from this directory:
 podman compose up -d
 ```
 
+### 3. Start Gateway (Required After Every Pod Restart)
+After starting the pod, you MUST run these commands:
+```powershell
+# Install Node.js (only needed once after container is fresh)
+podman exec -u root openclaw_gui_v2 sh -c "curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && apt-get install -y nodejs"
+
+# Start the gateway
+podman exec -d openclaw_gui_v2 sh -c "cd /config/openclaw && nohup node dist/index.js gateway run --force > /config/gateway.log 2>&1 &"
+
+# Restart Caddy proxy (to connect to gateway)
+podman restart caddy_openclaw_proxy
+```
+
+Wait 10 seconds, then access https://localhost:8443/
+
 ### 3. Access OpenClaw
 - **Web UI**: [https://localhost:8443](https://localhost:8443) (Bypass security warnings)
 - **KDE Desktop**: [http://localhost:3002](http://localhost:3002)
