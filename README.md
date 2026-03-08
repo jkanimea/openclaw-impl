@@ -19,7 +19,13 @@ podman compose up -d
 ```
 
 ### 3. Start Gateway (Required After Every Pod Restart)
-After starting the pod, you MUST run these commands:
+
+**Option A - Use the batch script (recommended):**
+```powershell
+.\start_openclaw.bat
+```
+
+**Option B - Manual commands:**
 ```powershell
 # Install Node.js (only needed once after container is fresh)
 podman exec -u root openclaw_gui_v2 sh -c "curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && apt-get install -y nodejs"
