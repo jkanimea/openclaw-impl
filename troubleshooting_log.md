@@ -37,6 +37,34 @@
 **Error**: "Running as root without --no-sandbox is not supported"
 **Resolution**: Add `"noSandbox": true` to browser config (see above).
 
+### Issue: 502 Bad Gateway - Container IP Changes After Restart
+**Cause**: Podman assigns a new IP address to the container each time it starts. The Caddyfile has a hardcoded IP that becomes stale.
+**Resolution**:
+1. Get the new container IP:
+   ```bash
+   podman exec openclaw_gui_v2 ip -4 addr show eth0 | grep inet
+   ```
+2. Update Caddyfile with the new IP:
+   ```
+   reverse_proxy <NEW_IP>:18789
+   ```
+3. Restart Caddy:
+   ```bash
+   podman restart caddy_openclaw_proxy
+   ```
+
+**Permanent Fix** - Use host networking in docker-compose.yml:
+```yaml
+services:
+  ubuntu-gui:
+    network_mode: host
+    ports:  # remove ports section when using host network
+```
+Then update Caddyfile to use:
+```
+reverse_proxy 127.0.0.1:18789
+```
+
 ### Issue: Container Loses Node.js After Restart
 **Cause**: The webtop container image doesn't include Node.js. It must be installed after first start.
 **Resolution**:
