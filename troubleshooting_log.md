@@ -60,15 +60,13 @@
 
 ### Issue: Gateway Not Running After Podman Restart
 **Scenario**: After restarting the pod from Podman Desktop, HTTPS returns 502.
-**Cause**: The gateway does NOT auto-start after container restart. It must be started manually.
-**Resolution**:
-1. Start the gateway inside the container:
-   ```bash
-   podman exec -d openclaw_gui_v2 sh -c "cd /config/openclaw && nohup node dist/index.js gateway run --force > /config/gateway.log 2>&1 &"
-   ```
-2. Wait 5-10 seconds for it to start
-3. Verify: `podman exec openclaw_gui_v2 ss -tlnp | grep 18789`
-4. Test: `curl -k -o /dev/null -w "%{http_code}" https://localhost:8443/`
+**Cause**: The gateway does NOT auto-start after container restart.
+**Resolution** - Run this command after starting the pod:
+```bash
+podman exec -d openclaw_gui_v2 sh -c "cd /config/openclaw && nohup node dist/index.js gateway run --force > /config/gateway.log 2>&1 &"
+```
+
+Wait 10 seconds, then test: https://localhost:8443/
 
 ### Issue: Container Loses Node.js After Restart
 **Cause**: The webtop container image doesn't include Node.js. It must be installed after first start.

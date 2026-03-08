@@ -22,6 +22,13 @@ services:
       - 18789:18789
     shm_size: "2gb"
     restart: unless-stopped
+    command: >
+      /bin/bash -c "
+      curl -fsSL https://deb.nodesource.com/setup_22.x | bash - &&
+      apt-get install -y nodejs &&
+      cd /config/openclaw &&
+      nohup node dist/index.js gateway run --force > /config/gateway.log 2>&1 &
+      /init"
 
   caddy:
     image: caddy:latest
