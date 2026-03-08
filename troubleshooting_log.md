@@ -14,7 +14,11 @@
        }
      },
      "browser": {
-       "enabled": true
+       "enabled": true,
+       "headless": true,
+       "noSandbox": true,
+       "defaultProfile": "openclaw",
+       "executablePath": "/usr/bin/chromium"
      }
    }
    ```
@@ -27,6 +31,11 @@
    podman exec openclaw_gui_v2 sh -c "pkill -f openclaw-gateway || true"
    podman exec -d openclaw_gui_v2 sh -c "cd /config/openclaw && nohup node dist/index.js gateway run --force > /config/gateway.log 2>&1 &"
    ```
+
+### Issue: Chrome Fails to Start - Running as root without --no-sandbox
+**Cause**: Chrome can't run with sandbox in container as root user.
+**Error**: "Running as root without --no-sandbox is not supported"
+**Resolution**: Add `"noSandbox": true` to browser config (see above).
 
 ### Issue: Container Loses Node.js After Restart
 **Cause**: The webtop container image doesn't include Node.js. It must be installed after first start.
