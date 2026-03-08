@@ -53,17 +53,22 @@
    podman restart caddy_openclaw_proxy
    ```
 
-**Permanent Fix** - Use host networking in docker-compose.yml:
-```yaml
-services:
-  ubuntu-gui:
-    network_mode: host
-    ports:  # remove ports section when using host network
-```
-Then update Caddyfile to use:
-```
-reverse_proxy 127.0.0.1:18789
-```
+**Permanent Fix** - Use static IP in docker-compose.yml (see latest docker-compose.yml):
+1. Container gets static IP `10.89.0.10`
+2. Caddyfile points to `10.89.0.10:18789`
+3. No IP changes after restart
+
+### Issue: Gateway Not Running After Podman Restart
+**Scenario**: After restarting the pod from Podman Desktop, HTTPS returns 502.
+**Cause**: The gateway does NOT auto-start after container restart. It must be started manually.
+**Resolution**:
+1. Start the gateway inside the container:
+   ```bash
+   podman exec -d openclaw_gui_v2 sh -c "cd /config/openclaw && nohup node dist/index.js gateway run --force > /config/gateway.log 2>&1 &"
+   ```
+2. Wait 5-10 seconds for it to start
+3. Verify: `podman exec openclaw_gui_v2 ss -tlnp | grep 18789`
+4. Test: `curl -k -o /dev/null -w "%{http_code}" https://localhost:8443/`
 
 ### Issue: Container Loses Node.js After Restart
 **Cause**: The webtop container image doesn't include Node.js. It must be installed after first start.
