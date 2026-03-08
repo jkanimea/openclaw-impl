@@ -26,7 +26,7 @@ services:
   caddy:
     image: caddy:latest
     container_name: caddy_openclaw_proxy
-    restart: unless-stopped
+    restart: on-failure:10
     ports:
       - "8443:8443"
     volumes:
@@ -34,7 +34,8 @@ services:
       - ./localhost+3.pem:/etc/caddy/cert.pem:ro
       - ./localhost+3-key.pem:/etc/caddy/key.pem:ro
     depends_on:
-      - ubuntu-gui
+      ubuntu-gui:
+        condition: service_started
     networks:
       - openclaw_network
 
