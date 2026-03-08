@@ -22,6 +22,26 @@ podman compose up -d
 - **Web UI**: [https://localhost:8443](https://localhost:8443) (Bypass security warnings)
 - **KDE Desktop**: [http://localhost:3002](http://localhost:3002)
 
+### 4. Configuration Files
+The OpenClaw config is stored in `openclaw_data/` on the host for easy editing:
+```
+openclaw_data/
+└── .openclaw/
+    ├── openclaw.json      # Main config (gateway, auth, tools)
+    ├── agents/            # Agent configurations
+    ├── models.json        # Model settings
+    └── ...
+```
+
+**Editing Config**: Edit files directly in `openclaw_data/.openclaw/` on the host, then restart the gateway:
+```powershell
+podman exec openclaw_gui_v2 sh -c "pkill -f openclaw-gateway || true"
+podman exec -d openclaw_gui_v2 sh -c "cd /config/openclaw && nohup node dist/index.js gateway run --force > /config/gateway.log 2>&1 &"
+```
+
+### 5. Default Auth Token
+- **Token**: `c14b2b7664ad3f1ef2ab5d91206ad80931d0bf2b84a21e7b`
+
 ---
 
 ## 🔍 Resolved Features & Fixes

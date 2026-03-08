@@ -1,5 +1,64 @@
 # OpenClaw Troubleshooting Master Log (Consolidated)
 
+### Issue: Agent Uses Web Search Instead of Browser for YouTube
+**Scenario**: Agent uses DuckDuckGo web search instead of opening browser to navigate YouTube.
+**Cause**: Browser tool is not enabled in openclaw.json.
+**Resolution**:
+1. Enable browser tool in openclaw.json:
+   ```json
+   "tools": {
+     "web": {
+       "search": {
+         "provider": "duckduckgo",
+         "enabled": true
+       }
+     },
+     "browser": {
+       "enabled": true
+     }
+   }
+   ```
+2. Update openclaw_container.json (local backup):
+   ```bash
+   podman cp openclaw_container.json openclaw_gui_v2:/config/.openclaw/.openclaw/openclaw.json
+   ```
+3. Restart gateway:
+   ```bash
+   podman exec openclaw_gui_v2 sh -c "pkill -f openclaw-gateway || true"
+   podman exec -d openclaw_gui_v2 sh -c "cd /config/openclaw && nohup node dist/index.js gateway run --force > /config/gateway.log 2>&1 &"
+   ```
+
+### Issue: Container Loses Node.js After Restart
+**Cause**: The webtop container image doesn't include Node.js. It must be installed after first start.
+**Resolution**:
+1. After container starts, install Node.js:
+   ```bash
+   podman exec -u root openclaw_gui_v2 sh -c "curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && apt-get install -y nodejs"
+   ```
+2. Start gateway:
+   ```bash
+   podman exec -d openclaw_gui_v2 sh -c "cd /config/openclaw && nohup node dist/index.js gateway run --force > /config/gateway.log 2>&1 &"
+   ```
+
+### Issue: Editing openclaw.json - Config Files Not Visible in Project Folder
+**Scenario**: The `openclaw.json` and agent configs are stored in a Podman volume, not visible in the host filesystem.
+**Cause**: docker-compose.yml was using `config_vol:/config` (Podman managed volume).
+**Resolution**:
+1. Changed docker-compose.yml to mount host folder instead:
+   ```yaml
+   volumes:
+     - ./openclaw_data:/config
+   ```
+2. Config files are now in `openclaw_data/.openclaw/` on the host:
+   - `openclaw.json` - Main gateway config
+   - `agents/main/agent/agent.json` - Agent tool config
+   - `agents/main/agent/models.json` - Model context window settings
+3. After editing, restart gateway:
+   ```bash
+   podman exec openclaw_gui_v2 sh -c "pkill -f openclaw-gateway || true"
+   podman exec -d openclaw_gui_v2 sh -c "cd /config/openclaw && nohup node dist/index.js gateway run --force > /config/gateway.log 2>&1 &"
+   ```
+
 ### Issue: Slow Response Times / High CPU Usage (GPU Acceleration Fix)
 **Scenario**: Model generation is slow (longer than a few seconds) or causing high CPU usage because Ollama is running in a CPU-only Podman container.
 **Resolution**:
@@ -20,13 +79,18 @@
 ### Issue: "pairing required" / Approval Loop
 **Scenario**: Even with the correct token, you get "pairing required" and are stuck in a loop.
 **Resolution**:
-1. Identify the pending Device UUID from the terminal:
+1. List pending devices:
    ```bash
-   node dist/index.js devices list
+   podman exec openclaw_gui_v2 sh -c "cd /config/openclaw && node dist/index.js devices list"
    ```
-2. Approve the UUID:
+2. Approve each pending device using the Request ID (first column):
    ```bash
-   node dist/index.js devices approve <UUID>
+   # Replace <REQUEST_ID> with the ID from the Request column (e.g., 16b996fd-eb64-465b-89e5-2c0d1fc23673)
+   podman exec openclaw_gui_v2 sh -c "cd /config/openclaw && node dist/index.js devices approve <REQUEST_ID>"
+   ```
+3. Verify approved devices:
+   ```bash
+   podman exec openclaw_gui_v2 sh -c "cd /config/openclaw && node dist/index.js devices list"
    ```
 
 ### Issue: "ERR_CONNECTION_REFUSED" on port 3001

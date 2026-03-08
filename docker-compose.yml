@@ -11,6 +11,7 @@ services:
       - START_DOCKER=true # Enables Docker-in-Docker inside the Alpine desktop
       - OLLAMA_HOST=ollama:11434
     volumes:
+      - ./openclaw_config:/config/.openclaw
       - config_vol:/config
     ports:
       - 3002:3000

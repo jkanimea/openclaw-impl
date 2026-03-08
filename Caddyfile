@@ -1,4 +1,4 @@
 :8443 {
     tls /etc/caddy/cert.pem /etc/caddy/key.pem
-    reverse_proxy ubuntu-gui:18789
+    reverse_proxy 10.89.0.2:18789
 }

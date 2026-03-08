@@ -1,0 +1,75 @@
+{
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "ollama/qwen3.5:2b",
+        "fallbacks": [
+          "ollama/qwen3.5:0.8b"
+        ]
+      }
+    }
+  },
+  "models": {
+    "providers": {
+      "ollama": {
+        "baseUrl": "http://ollama:11434",
+        "apiKey": "ollama-local",
+        "api": "ollama",
+        "models": [
+          {
+            "id": "qwen3.5:2b",
+            "name": "QWEN3.5 2B",
+            "contextWindow": 16384
+          },
+          {
+            "id": "qwen3.5:0.8b",
+            "name": "QWEN3.5 0.8B",
+            "contextWindow": 16384
+          }
+        ]
+      }
+    }
+  },
+  "commands": {
+    "native": "auto",
+    "nativeSkills": "auto",
+    "restart": true,
+    "ownerDisplay": "raw"
+  },
+  "gateway": {
+    "mode": "local",
+    "bind": "lan",
+    "controlUi": {
+      "allowedOrigins": [
+        "https://localhost:8443",
+        "http://[::1]:18789",
+        "http://172.28.39.91:18789"
+      ],
+      "dangerouslyAllowHostHeaderOriginFallback": true,
+      "allowInsecureAuth": true
+    },
+    "auth": {
+      "mode": "token",
+      "token": "c14b2b7664ad3f1ef2ab5d91206ad80931d0bf2b84a21e7b"
+    },
+    "trustedProxies": [
+      "10.89.0.0/16",
+      "127.0.0.1"
+    ]
+  },
+  "meta": {
+    "lastTouchedVersion": "2026.3.3",
+    "lastTouchedAt": "2026-03-05T11:24:02.309Z"
+  },
+  "tools": {
+    "web": {
+      "search": {
+        "provider": "duckduckgo",
+        "enabled": true
+      }
+    },
+    "browser": {
+      "enabled": true
+    }
+  }
+}
